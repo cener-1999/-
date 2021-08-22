@@ -1,11 +1,9 @@
 # -*-coding:utf-8-*-
 
-# TODO: 1. 先给屏蔽关键词
-
-from session import get_session
-from createbales import Project_ifo
 import jieba.analyse
 import re
+from session import get_session
+from createbales import Project_ifo
 
 class Keywords_Catch():
 
@@ -13,7 +11,7 @@ class Keywords_Catch():
         self.keywords={}
         self.makeDic()
 
-    #初始内容存盘
+    #初始内容存盘,主要为了测试
     def getFile(self):
         fp=open('allcontent.txt','w')
         session = get_session()
@@ -31,16 +29,14 @@ class Keywords_Catch():
         for result in results:
             str=(result.procontent)
             str=re.sub(u"([^\u4e00-\u9fa5\u0030-\u0039\u0041-\u005a\u0061-\u007a])", "", (str))
-            self.catchWord(str)
+            self.catchWord3(str)
 
         self.findMax()
 
-        for i in range(len(self.top)):
-            print(self.top[i])
-
         # for i in range(len(self.top)):
-        #     if self.top[i][1] in self.tec_words:
-        #         print(self.top[i])
+        #     print(self.top[i])
+
+
 
 
     #方法一：清华词库加自己的stop
@@ -78,13 +74,25 @@ class Keywords_Catch():
                     self.keywords[word]=1
 
     def findMax(self):
-        #找出词典中最高的15项
+        #把字典转为有序词典
         word = list(self.keywords.keys())
         times = list(self.keywords.values())
         self.top = []
         for i in range(len(self.keywords)):
             self.top.append((times[i],word[i]))
         self.top.sort(reverse=True)
+        #对应技术词典,截取前十五的高频
+        self.top15 = []
+        for i in range (len(self.top)):
+            if self.top[i][1] in self.tec_words:
+                if(len(self.top15)<15):
+                    self.top15.append(self.top[i])
+
+        # for l in self.top15:
+        #     print(l)
+
+        self.storeDate()
+
 
 
     #制作停用词和专业词词典
@@ -111,7 +119,14 @@ class Keywords_Catch():
 
         print(self.tec_words)
 
-#     def storeDate(self):
+    #存top15的数据给后端，以txt的形式
+    #记得改文件名
+    def storeDate(self):
+        filename="results/tec_top15.txt"
+        result_f = open(filename, "w", encoding='utf-8')
+        for data in self.top15:
+            print(data)
+            result_f.write(str(data[0])+' '+data[1]+'\n')
 
 
 test=Keywords_Catch()
